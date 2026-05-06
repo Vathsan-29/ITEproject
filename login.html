@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organzzz Store - Login</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin:0;
+    background: linear-gradient(135deg, #e0e7ff, #fef3c7);
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+header {
+    background: linear-gradient(90deg, #000, #1f2937);
+    color:white;
+    padding:14px;
+    text-align:center;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+footer {
+    background: linear-gradient(90deg, #111, #000);
+    color:white;
+    text-align:center;
+    padding:12px;
+    font-size:12px;
+}
+
+.wrapper {
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:16px;
+}
+
+.card {
+    width:92%;
+    max-width:420px;
+    background: rgba(255,255,255,0.96);
+    padding:28px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+.brand {
+    text-align:center;
+    font-weight:bold;
+    font-size:18px;
+    margin-bottom:6px;
+}
+
+.subtitle {
+    text-align:center;
+    font-size:12px;
+    color:#6b7280;
+    margin-bottom:18px;
+}
+
+.tabs {
+    display:flex;
+    border-bottom:1px solid #e5e7eb;
+    margin-bottom:16px;
+}
+
+.tab {
+    flex:1;
+    text-align:center;
+    padding:10px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    color:#6b7280;
+}
+
+.tab.active {
+    color:#4f46e5;
+    border-bottom:2px solid #4f46e5;
+}
+
+label {
+    display:block;
+    font-size:12px;
+    margin-top:10px;
+    color:#374151;
+}
+
+input {
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:14px;
+}
+
+input:focus {
+    border-color:#4f46e5;
+    outline:none;
+    box-shadow:0 0 5px rgba(79,70,229,0.3);
+}
+
+button {
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    color:white;
+    background: linear-gradient(90deg, #111, #4f46e5);
+    font-size:14px;
+}
+
+button:hover { transform: translateY(-2px); }
+
+.alt {
+    text-align:center;
+    font-size:12px;
+    margin-top:10px;
+    color:#4f46e5;
+    cursor:pointer;
+}
+
+.social {
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+}
+
+.social button {
+    flex:1;
+    background:#fff;
+    color:#111;
+    border:1px solid #ddd;
+    font-weight:600;
+}
+
+.hidden { display:none; }
+
+@media (max-width:480px){
+    .card{padding:20px;}
+}
+</style>
+</head>
+
+<body>
+
+<header>ORGANZZZ STORE</header>
+
+<div class="wrapper">
+<div class="card">
+
+<div class="brand">Welcome to ORGANZZZ</div>
+<div class="subtitle">Your premium shopping destination</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('login')">Login</div>
+<div class="tab" onclick="switchTab('signup')">Sign Up</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginBox">
+<label>Email</label>
+<input id="loginEmail" placeholder="Enter email">
+
+<label>Password</label>
+<input id="loginPass" type="password" placeholder="Enter password">
+
+<button onclick="login()">Sign In</button>
+
+<div class="alt" onclick="alert('Reset link feature coming soon')">Forgot Password?</div>
+
+<div class="social">
+<button onclick="alert('Google login demo')">Google</button>
+<button onclick="alert('Apple login demo')">Apple</button>
+</div>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupBox" class="hidden">
+<label>Full Name</label>
+<input id="name" placeholder="Enter full name">
+
+<label>Email</label>
+<input id="email" placeholder="Enter email">
+
+<label>Password</label>
+<input id="pass" type="password" placeholder="Create password">
+
+<button onclick="signup()">Create Account</button>
+</div>
+
+</div>
+</div>
+
+<footer>
+Support: support@organzzz.com ✦ © 2026 ORGANZZZ
+</footer>
+
+<script>
+let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+function switchTab(tab){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+
+    if(tab==='login'){
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('loginBox').classList.remove('hidden');
+        document.getElementById('signupBox').classList.add('hidden');
+    } else {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('signupBox').classList.remove('hidden');
+        document.getElementById('loginBox').classList.add('hidden');
+    }
+}
+
+function signup(){
+    let name=document.getElementById('name').value;
+    let email=document.getElementById('email').value;
+    let pass=document.getElementById('pass').value;
+
+    if(!name || !email || !pass){
+        alert("Please fill all fields");
+        return;
+    }
+
+    users[email]={name,pass};
+    localStorage.setItem("users",JSON.stringify(users));
+
+    alert("Account created successfully. Please login.");
+    switchTab('login');
+}
+
+function login(){
+    let email=document.getElementById('loginEmail').value;
+    let pass=document.getElementById('loginPass').value;
+
+    if(users[email] && users[email].pass===pass){
+        localStorage.setItem("login","true");
+        window.location.href="home.html"; // ✅ redirected here
+    } else {
+        alert("Invalid email or password");
+    }
+}
+</script>
+
+</body>
+</html>

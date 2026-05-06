@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organzzz Store</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI', sans-serif;
+  background:linear-gradient(135deg,#e0e7ff,#fef3c7);
+}
+
+header{
+  background:#111827;
+  color:white;
+  text-align:center;
+  padding:14px;
+  font-weight:bold;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  background:white;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+input,select{
+  padding:9px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+.container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 8px 18px rgba(0,0,0,0.12);
+  display:flex;
+  flex-direction:column;
+}
+
+.card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+}
+
+.content{padding:10px;}
+.title{font-weight:bold;font-size:14px;}
+.price{color:green;font-weight:bold;}
+.rating{color:orange;}
+.stock{font-size:11px;color:#16a34a;font-weight:bold;}
+.desc{font-size:11px;color:#444;white-space:pre-line;}
+
+button {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  color:white;
+  background: linear-gradient(90deg, #111, #4f46e5);
+  font-size:14px;
+}
+
+#cart{
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  background:#111827;
+  color:white;
+  padding:12px;
+  border-radius:12px;
+  width:200px;
+}
+
+#cart button{
+  margin-top:10px;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+}
+</style>
+</head>
+
+<body>
+
+<header>🌿 ORGANZZZ STORE — FULL ORGANIC SUPERSTORE</header>
+
+<div class="topbar">
+
+<input placeholder="Search..." onkeyup="setSearch(this.value)">
+
+<select id="cat" onchange="applyFilters()">
+<option value="all">All</option>
+<option value="soap">Soaps</option>
+<option value="oil">Oils</option>
+<option value="shampoo">Shampoos</option>
+<option value="facewash">Face Wash</option>
+<option value="powder">Powders</option>
+<option value="brush">Brush</option>
+<option value="paste">Paste</option>
+<option value="men">Men</option>
+<option value="women">Women</option>
+<option value="kids">Kids</option>
+<option value="elder">Elderly</option>
+</select>
+
+<select id="sort" onchange="applyFilters()">
+<option value="">Sort</option>
+<option value="low">Price ↑</option>
+<option value="high">Price ↓</option>
+<option value="rating">Rating ★</option>
+</select>
+
+</div>
+
+<div class="container" id="products"></div>
+
+<!-- CART -->
+<div id="cart">
+🛒 Items: <span id="count">0</span><br>
+💰 Total: ₹<span id="total">0</span><br>
+
+<button onclick="checkout()">Checkout ⚡</button>
+</div>
+
+<script>
+
+const products = [
+
+/* 🧼 SOAPS */
+{
+name:"Neem Soap",
+price:120,
+rating:4.6,
+cat:"soap",
+img:"https://picsum.photos/seed/neemsoap/400/300",
+desc:"Neem Soap is a powerful antibacterial cleansing bar designed for daily skincare. It helps fight acne-causing bacteria, reduces excess oil, and keeps skin fresh while supporting natural healing and clarity."
+},
+{
+name:"Aloe Soap",
+price:130,
+rating:4.7,
+cat:"soap",
+img:"https://picsum.photos/seed/aloesoap/400/300",
+desc:"Aloe Soap deeply hydrates and calms irritated skin using natural aloe extracts. It restores moisture balance, reduces redness, and gives a cooling effect perfect for sensitive and dry skin types."
+},
+{
+name:"Turmeric Soap",
+price:140,
+rating:4.6,
+cat:"soap",
+img:"https://picsum.photos/seed/turmericsoap/400/300",
+desc:"Turmeric Soap blends traditional turmeric with cleansing care to brighten skin, reduce dark spots, and improve natural glow while protecting against pollution and daily damage."
+},
+{
+name:"Charcoal Soap",
+price:160,
+rating:4.8,
+cat:"soap",
+img:"https://picsum.photos/seed/charcoalsoap/400/300",
+desc:"Charcoal Soap deeply detoxifies skin by removing dirt, oil, and toxins from pores. It helps reduce acne, blackheads, and dullness while keeping skin fresh and balanced."
+},
+{
+name:"Milk Soap",
+price:150,
+rating:4.5,
+cat:"soap",
+img:"https://picsum.photos/seed/milksoap/400/300",
+desc:"Milk Soap nourishes skin with milk proteins that soften texture, improve glow, and gently exfoliate dead cells for silky smooth hydration and daily comfort."
+},
+
+/* 🛢️ OILS */
+{
+name:"Coconut Oil",
+price:200,
+rating:4.7,
+cat:"oil",
+img:"https://picsum.photos/seed/coconutoil/400/300",
+desc:"Coconut Oil is a multi-purpose natural oil used for hair strengthening, skin hydration, and overall wellness. It deeply nourishes and supports traditional beauty care routines."
+},
+{
+name:"Castor Oil",
+price:250,
+rating:4.6,
+cat:"oil",
+img:"https://picsum.photos/seed/castoroil/400/300",
+desc:"Castor Oil promotes hair growth, strengthens roots, and improves scalp health. It is rich in nutrients that support thicker eyebrows, lashes, and healthier hair regrowth."
+},
+{
+name:"Almond Oil",
+price:300,
+rating:4.7,
+cat:"oil",
+img:"https://picsum.photos/seed/almondoil/400/300",
+desc:"Almond Oil is rich in Vitamin E, deeply nourishing skin and hair. It reduces dryness, improves elasticity, and enhances natural glow with lightweight fast absorption."
+},
+{
+name:"Argan Oil",
+price:450,
+rating:4.8,
+cat:"oil",
+img:"https://picsum.photos/seed/arganoil/400/300",
+desc:"Argan Oil repairs damaged hair, controls frizz, and restores shine. Known as liquid gold, it delivers salon-like nourishment and long-term hair transformation."
+},
+{
+name:"Olive Oil",
+price:280,
+rating:4.6,
+cat:"oil",
+img:"https://picsum.photos/seed/oliveoil/400/300",
+desc:"Olive Oil deeply moisturizes skin and hair while supporting anti-aging benefits. It is rich in antioxidants and healthy fats that promote overall wellness and softness."
+},
+
+/* 💆 SHAMPOO */
+{
+name:"Herbal Shampoo",
+price:220,
+rating:4.6,
+cat:"shampoo",
+img:"https://picsum.photos/seed/herbalshampoo/400/300",
+desc:"Herbal Shampoo gently cleanses scalp using natural herbs. It reduces dandruff, strengthens roots, and supports healthy hair growth without harsh chemicals."
+},
+{
+name:"Amla Shampoo",
+price:240,
+rating:4.7,
+cat:"shampoo",
+img:"https://picsum.photos/seed/amlashampoo/400/300",
+desc:"Amla Shampoo strengthens hair, prevents greying, and boosts shine using vitamin-rich amla extracts that improve scalp circulation and overall hair vitality."
+},
+{
+name:"Neem Shampoo",
+price:230,
+rating:4.6,
+cat:"shampoo",
+img:"https://picsum.photos/seed/neemshampoo/400/300",
+desc:"Neem Shampoo controls dandruff and scalp infections using antibacterial neem properties while keeping hair clean, fresh, and balanced."
+},
+{
+name:"Kids Shampoo",
+price:150,
+rating:4.5,
+cat:"shampoo",
+img:"https://picsum.photos/seed/kidsshampoo/400/300",
+desc:"Kids Shampoo is a gentle tear-free formula designed for children’s sensitive scalp. It cleans softly while keeping hair smooth and safe."
+},
+{
+name:"Protein Shampoo",
+price:260,
+rating:4.7,
+cat:"shampoo",
+img:"https://picsum.photos/seed/proteinshampoo/400/300",
+desc:"Protein Shampoo repairs damaged hair by restoring keratin strength, reducing breakage, and improving volume for healthier and stronger hair strands."
+},
+
+/* 🌿 FACE WASH */
+{
+name:"Aloe Face Wash",
+price:180,
+rating:4.6,
+cat:"facewash",
+img:"https://picsum.photos/seed/aloefacewash/400/300",
+desc:"Aloe Face Wash hydrates and soothes skin while gently removing impurities. It keeps skin soft, refreshed, and naturally glowing after every use."
+},
+{
+name:"Neem Face Wash",
+price:170,
+rating:4.7,
+cat:"facewash",
+img:"https://picsum.photos/seed/neemfacewash/400/300",
+desc:"Neem Face Wash fights acne-causing bacteria, controls oil, and deeply cleans pores for clearer, healthier, and breakout-free skin."
+},
+{
+name:"Turmeric Face Wash",
+price:190,
+rating:4.6,
+cat:"facewash",
+img:"https://picsum.photos/seed/turmericfacewash/400/300",
+desc:"Turmeric Face Wash brightens skin tone, reduces pigmentation, and promotes natural glow with traditional healing properties."
+},
+{
+name:"Charcoal Face Wash",
+price:200,
+rating:4.8,
+cat:"facewash",
+img:"https://picsum.photos/seed/charcoalfw/400/300",
+desc:"Charcoal Face Wash detoxifies skin by removing deep impurities, reducing acne, and leaving skin fresh and purified."
+},
+{
+name:"Honey Face Wash",
+price:185,
+rating:4.6,
+cat:"facewash",
+img:"https://picsum.photos/seed/honeyfacewash/400/300",
+desc:"Honey Face Wash locks moisture into skin while gently cleansing, leaving skin soft, smooth, and naturally glowing."
+},
+
+/* 🌸 POWDER */
+{
+name:"Multani Mitti",
+price:160,
+rating:4.7,
+cat:"powder",
+img:"https://picsum.photos/seed/multanimitti/400/300",
+desc:"Multani Mitti deeply cleans pores, absorbs oil, and removes impurities, making skin fresh, clear, and naturally radiant."
+},
+{
+name:"Herbal Powder",
+price:140,
+rating:4.5,
+cat:"powder",
+img:"https://picsum.photos/seed/herbalpowder/400/300",
+desc:"Herbal Powder nourishes skin using natural ingredients, improving softness, reducing dullness, and enhancing glow."
+},
+{
+name:"Sandal Powder",
+price:180,
+rating:4.6,
+cat:"powder",
+img:"https://picsum.photos/seed/sandalpowder/400/300",
+desc:"Sandal Powder cools skin, reduces irritation, and enhances complexion with natural aromatic healing properties."
+},
+{
+name:"Rose Powder",
+price:170,
+rating:4.6,
+cat:"powder",
+img:"https://picsum.photos/seed/rosepowder/400/300",
+desc:"Rose Powder refreshes skin, improves hydration, and adds a soft natural glow with soothing floral essence."
+},
+{
+name:"Neem Powder",
+price:150,
+rating:4.6,
+cat:"powder",
+img:"https://picsum.photos/seed/neempowder/400/300",
+desc:"Neem Powder fights acne, removes impurities, and promotes clear skin using powerful antibacterial herbal properties."
+},
+
+/* 🪥 BRUSH */
+{
+name:"Bamboo Brush",
+price:90,
+rating:4.6,
+cat:"brush",
+img:"https://picsum.photos/seed/bamboobrush/400/300",
+desc:"Bamboo Brush is eco-friendly and biodegradable, offering effective cleaning while reducing environmental impact and promoting sustainable living."
+},
+{
+name:"Charcoal Brush",
+price:110,
+rating:4.7,
+cat:"brush",
+img:"https://picsum.photos/seed/charcoalbrush/400/300",
+desc:"Charcoal Brush removes stains and whitens teeth naturally using charcoal-infused bristles for deep oral cleaning."
+},
+{
+name:"Kids Brush",
+price:80,
+rating:4.5,
+cat:"brush",
+img:"https://picsum.photos/seed/kidsbrush/400/300",
+desc:"Kids Brush features soft bristles and safe design for gentle cleaning, encouraging healthy brushing habits in children."
+},
+{
+name:"Herbal Brush",
+price:100,
+rating:4.6,
+cat:"brush",
+img:"https://picsum.photos/seed/herbalbrush/400/300",
+desc:"Herbal Brush supports gum health and freshness using naturally infused bristles for improved oral hygiene."
+},
+{
+name:"Premium Brush",
+price:130,
+rating:4.7,
+cat:"brush",
+img:"https://picsum.photos/seed/premiumbrush/400/300",
+desc:"Premium Brush offers advanced cleaning technology for superior plaque removal and dentist-like oral hygiene results."
+},
+
+/* 🪥 PASTE */
+{
+name:"Herbal Paste",
+price:110,
+rating:4.7,
+cat:"paste",
+img:"https://picsum.photos/seed/herbalpaste/400/300",
+desc:"Herbal Paste strengthens gums, fights bacteria, and provides natural oral care using plant-based ingredients."
+},
+{
+name:"Neem Paste",
+price:120,
+rating:4.6,
+cat:"paste",
+img:"https://picsum.photos/seed/neempaste/400/300",
+desc:"Neem Paste protects teeth and gums from infection while reducing plaque buildup using antibacterial neem properties."
+},
+{
+name:"Charcoal Paste",
+price:130,
+rating:4.7,
+cat:"paste",
+img:"https://picsum.photos/seed/charcoalpaste/400/300",
+desc:"Charcoal Paste whitens teeth, removes stains, and deeply cleans oral surfaces using activated charcoal technology."
+},
+{
+name:"Kids Paste",
+price:90,
+rating:4.5,
+cat:"paste",
+img:"https://picsum.photos/seed/kidspaste/400/300",
+desc:"Kids Paste is safe and fluoride-balanced, designed for children’s dental health with mild fruity flavor."
+},
+{
+name:"Mint Paste",
+price:100,
+rating:4.6,
+cat:"paste",
+img:"https://picsum.photos/seed/mintpaste/400/300",
+desc:"Mint Paste delivers strong freshness, removes bad breath, and ensures long-lasting oral cleanliness throughout the day."
+}
+];
+
+
+let cart=[];
+let total=0;
+let searchTerm="";
+
+function setSearch(val){
+  searchTerm=val.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters(){
+  let cat=document.getElementById("cat").value;
+  let sort=document.getElementById("sort").value;
+
+  let list=products.filter(p=>{
+    return (cat==="all"||p.cat===cat) &&
+    p.name.toLowerCase().includes(searchTerm);
+  });
+
+  if(sort==="low") list.sort((a,b)=>a.price-b.price);
+  if(sort==="high") list.sort((a,b)=>b.price-a.price);
+  if(sort==="rating") list.sort((a,b)=>b.rating-a.rating);
+
+  display(list);
+}
+
+function display(list){
+  document.getElementById("products").innerHTML=
+  list.map(p=>`
+    <div class="card">
+      <img src="${p.img}">
+      <div class="content">
+        <div class="title">${p.name}</div>
+        <div class="price">₹${p.price}</div>
+        <div class="rating">⭐ ${p.rating}</div>
+        <div class="stock">In Stock</div>
+        <div class="desc">${p.desc}</div>
+      </div>
+
+      <!-- ONLY + / - CONTROLS -->
+      <div style="display:flex;gap:5px;padding:10px;">
+        <button onclick="decrease('${p.name}')" style="background:#ef4444;width:50%;">−</button>
+        <button onclick="increase('${p.name}')" style="background:#22c55e;width:50%;">+</button>
+      </div>
+
+    </div>
+  `).join("");
+}
+
+/* CART LOGIC (UNCHANGED) */
+
+function increase(name){
+  let item = products.find(p => p.name === name);
+  let existing = cart.find(c => c.name === name);
+
+  if(existing){
+    existing.qty += 1;
+    existing.totalPrice = existing.qty * existing.pricePerQty;
+  } else {
+    cart.push({
+      name: item.name,
+      qty: 1,
+      pricePerQty: item.price,
+      totalPrice: item.price
+    });
+  }
+
+  updateCart();
+}
+
+function decrease(name){
+  let existing = cart.find(c => c.name === name);
+  if(!existing) return;
+
+  existing.qty -= 1;
+
+  if(existing.qty <= 0){
+    cart = cart.filter(c => c.name !== name);
+  } else {
+    existing.totalPrice = existing.qty * existing.pricePerQty;
+  }
+
+  updateCart();
+}
+
+function updateCart(){
+  total = cart.reduce((sum, c) => sum + c.totalPrice, 0);
+
+  document.getElementById("count").innerText = cart.length;
+  document.getElementById("total").innerText = total;
+}
+
+function checkout(){
+  if(cart.length===0){
+    alert("Cart is empty 🌿");
+    return;
+  }
+
+  localStorage.setItem("cartItems", JSON.stringify(cart));
+  localStorage.setItem("cartTotal", total);
+
+  window.location.href="payment.html";
+}
+
+display(products);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ORGANZZZ Checkout</title>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin:0;
+  background: linear-gradient(135deg, #e0e7ff, #fef3c7);
+}
+
+header {
+  background: linear-gradient(90deg, #000, #1f2937);
+  color:white;
+  padding:14px;
+  text-align:center;
+  font-weight:bold;
+  letter-spacing:2px;
+}
+
+footer {
+  background: linear-gradient(90deg, #111, #000);
+  color:white;
+  text-align:center;
+  padding:12px;
+  font-size:12px;
+}
+
+.container {
+  width:92%;
+  max-width:430px;
+  margin:20px auto;
+  background: rgba(255,255,255,0.95);
+  padding:18px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+.section { display:none; }
+.section.active { display:block; }
+
+h2 { font-size:18px; }
+
+input {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+  box-sizing:border-box;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  color:white;
+  background: linear-gradient(90deg, #111, #4f46e5);
+  font-size:14px;
+}
+
+.method {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid #ddd;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  cursor:pointer;
+  background:white;
+  font-size:14px;
+}
+
+.selected {
+  border:2px solid #4f46e5;
+  background:#eef2ff;
+}
+
+.summary {
+  background:#f9fafb;
+  padding:10px;
+  border-radius:10px;
+}
+
+.homeIcon {
+  position:fixed;
+  bottom:70px;
+  right:15px;
+  background: linear-gradient(135deg, #111, #4f46e5);
+  color:#fff;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}
+
+table {
+  width:100%;
+  border-collapse: collapse;
+  margin-top:10px;
+  font-size:13px;
+}
+
+th, td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+
+#invoiceContent {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+}
+
+.invoice-line {
+  border:none;
+  border-top:1px solid #ddd;
+  margin:10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  ORGANZZZ ✦ PREMIUM STORE
+</header>
+
+<div class="container">
+
+<!-- ORDER -->
+<div id="order" class="section active">
+<h2>Order Summary</h2>
+
+<table>
+  <tr>
+    <th>Item</th>
+    <th>Rate</th>
+    <th>Qty</th>
+    <th>Amount</th>
+  </tr>
+
+  <tbody id="orderList"></tbody>
+
+  <tr>
+    <th colspan="3">Total Items</th>
+    <th><span id="totalItems"></span></th>
+  </tr>
+
+  <tr>
+    <th colspan="3">Grand Total</th>
+    <th>₹<span id="orderTotal"></span></th>
+  </tr>
+</table>
+
+<button onclick="nextPage('address')">Proceed to Payment</button>
+</div>
+
+<!-- ADDRESS -->
+<div id="address" class="section">
+<h2>Shipping Address</h2>
+
+<input id="fullName" placeholder="Full Name">
+<input id="phone" placeholder="Phone">
+<input id="addr" placeholder="Address">
+<input id="city" placeholder="City">
+
+<button onclick="nextPage('payment')">Continue</button>
+</div>
+
+<!-- PAYMENT -->
+<div id="payment" class="section">
+<h2>Payment Method</h2>
+
+<div class="method" onclick="selectMethod(this,'upi')">UPI Payment</div>
+<div class="method" onclick="selectMethod(this,'card')">Card Payment</div>
+<div class="method" onclick="selectMethod(this,'cod')">Cash on Delivery</div>
+
+<button onclick="placeOrder()">Place Order</button>
+</div>
+
+<!-- SUCCESS -->
+<div id="success" class="section">
+
+<h2 id="statusTitle"></h2>
+<p id="statusMsg"></p>
+
+<div class="summary">
+<p><b>Order ID:</b> <span id="orderId"></span></p>
+<p><b>Date:</b> <span id="orderDate"></span></p>
+<p><b>Delivery:</b> <span id="deliveryDate"></span></p>
+</div>
+
+<p><a href="#" onclick="showInvoice()">View Invoice</a></p>
+
+<div class="homeIcon" onclick="nextPage('order')">🏠</div>
+
+</div>
+
+<!-- INVOICE -->
+<div id="invoice" class="section">
+
+<div id="invoiceContent">
+
+<h2>ORGANZZZ INVOICE</h2>
+<hr class="invoice-line">
+
+<p><b>Invoice No:</b> <span id="invId"></span></p>
+<p><b>Date:</b> <span id="invDate"></span></p>
+
+<table>
+<tr>
+  <th>Item</th>
+  <th>Rate</th>
+  <th>Qty</th>
+  <th>Amount</th>
+</tr>
+
+<tbody id="invoiceItems"></tbody>
+
+<tr>
+  <th colspan="3">Total Items</th>
+  <th><span id="invTotalItems"></span></th>
+</tr>
+
+<tr>
+  <th colspan="3">Grand Total</th>
+  <th>₹<span id="invoiceTotal"></span></th>
+</tr>
+</table>
+
+</div>
+
+<button onclick="downloadPDF()">Download PDF</button>
+<button onclick="nextPage('success')">Back</button>
+
+</div>
+
+</div>
+
+<footer>
+Support: support@organzzz.com ✦ © 2026 ORGANZZZ
+</footer>
+
+<script>
+
+let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+let cartTotal = Number(localStorage.getItem("cartTotal")) || 0;
+
+let selectedMethod = "";
+
+/* NAVIGATION */
+function nextPage(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ORDER */
+function loadOrder(){
+  let html = "";
+  let totalItems = 0;
+
+  cartItems.forEach(item=>{
+    let amount = item.pricePerQty * item.qty;
+    totalItems += item.qty;
+
+    html += `
+      <tr>
+        <td>${item.name}</td>
+        <td>₹${item.pricePerQty}</td>
+        <td>${item.qty}</td>
+        <td>₹${amount}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("orderList").innerHTML = html;
+  document.getElementById("orderTotal").innerText = cartTotal;
+  document.getElementById("totalItems").innerText = totalItems;
+}
+
+/* INVOICE */
+function buildInvoice(){
+  let html = "";
+  let totalItems = 0;
+
+  cartItems.forEach(item=>{
+    let amount = item.pricePerQty * item.qty;
+    totalItems += item.qty;
+
+    html += `
+      <tr>
+        <td>${item.name}</td>
+        <td>₹${item.pricePerQty}</td>
+        <td>${item.qty}</td>
+        <td>₹${amount}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("invoiceItems").innerHTML = html;
+  document.getElementById("invoiceTotal").innerText = cartTotal;
+  document.getElementById("invTotalItems").innerText = totalItems;
+}
+
+loadOrder();
+
+/* PAYMENT */
+function selectMethod(el){
+  document.querySelectorAll('.method').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMethod = true;
+}
+
+/* ORDER */
+function placeOrder(){
+  const id = "ORD" + Math.floor(Math.random()*1000000);
+  const date = new Date().toDateString();
+
+  document.getElementById("orderId").innerText = id;
+  document.getElementById("orderDate").innerText = date;
+  document.getElementById("invId").innerText = id;
+  document.getElementById("invDate").innerText = date;
+
+  let d = new Date();
+  d.setDate(d.getDate()+5);
+  document.getElementById("deliveryDate").innerText = d.toDateString();
+
+  document.getElementById("statusTitle").innerText = "Order Confirmed";
+  document.getElementById("statusMsg").innerText = "Thank you for shopping 🌿";
+
+  nextPage('success');
+}
+
+/* INVOICE VIEW */
+function showInvoice(){
+  buildInvoice();
+  nextPage('invoice');
+}
+
+/* PDF */
+
+
+function downloadPDF(){
+  let invoiceTable = document.getElementById("invoiceContent").innerHTML;
+
+  const printWindow = window.open('', '', 'height=700,width=900');
+
+  printWindow.document.write(`
+    <html>
+    <head>
+      <title>ORGANZZZ Invoice</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+
+        header {
+          text-align: center;
+          padding: 15px;
+          background: #000;
+          color: #fff;
+          font-weight: bold;
+          letter-spacing: 2px;
+        }
+
+        footer {
+          text-align: center;
+          padding: 10px;
+          font-size: 12px;
+          background: #111;
+          color: #fff;
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+        }
+
+        .content {
+          padding: 20px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+          font-size: 14px;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+        }
+
+        th {
+          background: #f3f4f6;
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 10px;
+        }
+
+        .invoice-line {
+          border: none;
+          border-top: 1px solid #ccc;
+          margin: 10px 0;
+        }
+      </style>
+
+    </head>
+
+    <body>
+
+      <header>
+        ORGANZZZ ✦ PREMIUM STORE INVOICE
+      </header>
+
+      <div class="content">
+        ${invoiceTable}
+      </div>
+
+      <footer>
+        Support: support@organzzz.com ✦ © 2026 ORGANZZZ
+      </footer>
+
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+}
+
+
+/*
+function downloadPDF(){
+  const content = document.getElementById("invoiceContent").innerHTML;
+
+  const win = window.open('', '', 'height=700,width=800');
+  win.document.write('<html><body>');
+  win.document.write(content);
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+}*/
+
+</script>
+
+</body>
+</html>
