@@ -245,7 +245,7 @@ function login(){
 
     if(users[email] && users[email].pass===pass){
         localStorage.setItem("login","true");
-        window.location.href="home.html"; // ✅ redirected here
+        window.location.href="index.html"; // ✅ redirected here
     } else {
         alert("Invalid email or password");
     }
